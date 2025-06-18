@@ -1,0 +1,21 @@
+/* Center page vertically */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Login card styling */
+.login-card {
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+/* Form input spacing */
+.login-card .form-group {
+  margin-bottom: 1.2rem;
+}

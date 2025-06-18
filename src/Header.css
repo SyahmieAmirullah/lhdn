@@ -1,0 +1,46 @@
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  width: 100%;
+  background-color: #0d6efd; /* Bootstrap primary */
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-end; /* Align items to the left */
+  align-items: center; /* Vertically centers items */
+}
+
+/* Navbar brand (logo/title) */
+.header .navbar-brand {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+/* Nav links container */
+.header .nav-links {
+  display: flex;
+  margin-left: 15px; /* Adds space between brand and nav links */
+}
+
+/* Nav links */
+.header .nav-link {
+  color: #fff !important;
+  margin-left: 15px;
+  transition: color 0.2s ease;
+}
+
+/* Hover effect for nav links */
+.header .nav-link:hover {
+  color: #dfefff !important;
+  text-decoration: none;
+}
+
+/* Ensure dropdown menu aligns nicely */
+.dropdown-menu {
+  min-width: 150px;
+  font-size: 0.95rem;
+}

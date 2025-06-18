@@ -1,0 +1,94 @@
+/* Reset margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Set a pleasant font and background */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+  line-height: 1.6;
+}
+
+/* Container for pages */
+.page-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+}
+
+/* Header styles */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+/* Forms */
+form {
+  max-width: 500px;
+  margin: auto;
+}
+
+input,
+select,
+textarea {
+  margin-bottom: 1rem;
+}
+
+/* Center content */
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Navbar (if you use one) */
+.navbar-custom {
+  background-color: #0d6efd;
+}
+
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+  color: #fff;
+}
+
+/* Footer (optional) */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #e9ecef;
+  margin-top: 2rem;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-4 {
+  margin-top: 1rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
