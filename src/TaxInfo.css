@@ -1,0 +1,46 @@
+.tax-info-container {
+  margin-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.tax-info-card {
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+}
+
+.tax-info-card h5 {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.tax-info-card .row {
+  font-size: 1rem;
+  color: #333;
+}
+
+.tax-info-card .col-md-4 {
+  font-weight: 600;
+  color: #495057;
+}
+
+.tax-info-card .col-md-8 {
+  color: #212529;
+}
+
+@media (max-width: 768px) {
+  .tax-info-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .tax-info-card .row {
+    flex-direction: column;
+  }
+
+  .tax-info-card .col-md-4,
+  .tax-info-card .col-md-8 {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
