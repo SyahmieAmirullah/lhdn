@@ -38,24 +38,58 @@ const BE = () => {
       return;
     }
 
+    // Step 1: Get local profile data
     axios
       .get(`http://localhost:3000/api/profile/${userId}`)
       .then((res) => {
         const user = res.data;
         setFormData((prev) => ({
           ...prev,
-          name: user.fullname || "Default Name",
           ic: user.user_id || userId,
-          address: user.address || "",
-          occupation: user.occupation || "",
-          employmentIncome: user.incomeBracket || "",
           signedBy: user.fullname || "",
           icSignedBy: user.user_id || userId,
         }));
       })
       .catch((err) => {
-        console.error("Failed to fetch user profile", err);
+        console.error("Failed to fetch local profile", err);
         alert("Failed to fetch user profile");
+      });
+
+    // Step 2: Fetch from MyJPN API using IC
+    fetch("https://myjpn.ddns.net:5443/LHDNApi/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ icno: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.user) {
+          setFormData((prev) => ({
+            ...prev,
+            name: data.user.fullname || "",
+            address: data.user.address || "",
+          }));
+        } else {
+          console.warn("MyJPN data not found");
+        }
+      })
+      .catch((err) => {
+        console.error("MyJPN API error", err);
+      });
+
+    // ✅ Step 3: Fetch occupation & employment income
+    axios
+      .get(`http://localhost:3003/api/occupation/${userId}`)
+      .then((res) => {
+        const data = res.data;
+        setFormData((prev) => ({
+          ...prev,
+          occupation: data.OCCUPATION || "",
+          employmentIncome: parseFloat(data.INCOME) || 0,
+        }));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch occupation data", err);
       });
   }, []);
 
@@ -79,14 +113,14 @@ const BE = () => {
     } else if (taxableIncome <= 20000) {
       tax = (taxableIncome - 5000) * 0.01;
     } else if (taxableIncome <= 35000) {
-      tax = (15000 * 0.01) + (taxableIncome - 20000) * 0.03;
+      tax = 15000 * 0.01 + (taxableIncome - 20000) * 0.03;
     } else if (taxableIncome <= 50000) {
-      tax = (15000 * 0.01) + (15000 * 0.03) + (taxableIncome - 35000) * 0.08;
+      tax = 15000 * 0.01 + 15000 * 0.03 + (taxableIncome - 35000) * 0.08;
     } else {
       tax =
-        (15000 * 0.01) +
-        (15000 * 0.03) +
-        (15000 * 0.08) +
+        15000 * 0.01 +
+        15000 * 0.03 +
+        15000 * 0.08 +
         (taxableIncome - 50000) * 0.13;
     }
 
@@ -163,9 +197,9 @@ const BE = () => {
                   type="textarea"
                   name="address"
                   value={formData.address || ""}
-                  onChange={handleChange}
                   rows="3"
                   style={{ resize: "none", overflow: "hidden" }}
+                  disabled
                 />
               </FormGroup>
               <FormGroup>
@@ -174,7 +208,7 @@ const BE = () => {
                   type="text"
                   name="occupation"
                   value={formData.occupation || ""}
-                  onChange={handleChange}
+                  disabled
                 />
               </FormGroup>
 
@@ -228,7 +262,7 @@ const BE = () => {
                 />
               </FormGroup>
 
-              {/* E. Pengakuan */}
+              {/* D. Pengakuan */}
               <h5 className="mt-4">D. Pengakuan</h5>
               <FormGroup>
                 <Label>Ditandatangani Oleh</Label>

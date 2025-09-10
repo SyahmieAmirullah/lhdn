@@ -1,0 +1,98 @@
+/* InsertPayment.css */
+
+.payment-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  font-family: Arial, sans-serif;
+}
+
+.payment-container h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Info boxes */
+.info-box {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.info-gray {
+  background: #f7f7f7;
+  color: #444;
+}
+
+.info-blue {
+  background: #eef5ff;
+  border-left: 4px solid #3b82f6;
+  color: #1e40af;
+}
+
+.info-green {
+  background: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  color: #14532d;
+}
+
+/* Form styles */
+.payment-form label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.payment-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.payment-form input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* Button */
+.payment-form button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.payment-form button:hover {
+  background: #1e40af;
+}
+
+/* Messages */
+.message-success {
+  color: #16a34a;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.message-error {
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}

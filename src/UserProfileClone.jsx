@@ -33,7 +33,7 @@ const UserProfile = () => {
         const user = getUserFromSession();
         if (!user) throw new Error("No session found");
 
-        // Fetch internal profile (from local DB)
+        // Fetch internal profile (occupation, income, etc.)
         const localResponse = await axios.get(
           `http://localhost:3000/api/profile/${user.userId}`
         );
@@ -49,48 +49,19 @@ const UserProfile = () => {
           localData.dateOfBirth = `${day}-${month}-${fullYear}`;
         }
 
-        // Fetch fullname, address, payer status from external JPN API
-        const externalResponse = await axios.post(
-          "https://myjpn.ddns.net:5443/LHDNApi/profile",
-          {
-            icno: user.userId
-          }
+        // Fetch full name, address, status from your own API
+        const userInfoResponse = await axios.get(
+          `http://localhost:3001/api/user-info/${user.userId}`
         );
-        const externalData = externalResponse.data.user;
 
-        // Fetch occupation + income from occupation API
-        const occupationResponse = await axios.get(
-          `http://localhost:3003/api/occupation/${user.userId}`
-        );
-        const occupationData = occupationResponse.data;
+        const externalData = userInfoResponse.data;
 
-        // Merge all data
         const mergedData = {
           ...localData,
-          fullname: externalData.fullname,
-          address: externalData.address,
-          payerStatus: externalData.status,
-          occupation: occupationData.OCCUPATION,
-          incomeBracket: occupationData.INCOME
+          fullname: externalData.fullname || "N/A",
+          address: externalData.address || "N/A",
+          payerStatus: externalData.status || "N/A"
         };
-
-        // Derive social class from income
-        const incomeValue = parseFloat(occupationData.INCOME);
-        if (!isNaN(incomeValue)) {
-          if (incomeValue <= 4849) {
-            mergedData.socialClass = "B40";
-          } else if (incomeValue >= 4850 && incomeValue <= 10959) {
-            mergedData.socialClass = "M40";
-          } else if (incomeValue >= 10960) {
-            mergedData.socialClass = "T20";
-          }
-
-          // Format income nicely with commas
-          mergedData.incomeBracket = incomeValue.toLocaleString("en-MY", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-        }
 
         setFormData(mergedData);
         setLoading(false);
@@ -141,7 +112,7 @@ const UserProfile = () => {
                   { label: "Address/Alamat", name: "address" },
                   { label: "Date of Birth/Tarikh Lahir", name: "dateOfBirth" },
                   { label: "Occupation/Pekerjaan", name: "occupation" },
-                  { label: "Income/Pendapatan (RM)", name: "incomeBracket" },
+                  { label: "Income/Pendapatan", name: "incomeBracket" },
                   { label: "Social Class", name: "socialClass" }
                 ].map((field) => (
                   <Row className="mb-2" key={field.name}>
@@ -164,7 +135,7 @@ const UserProfile = () => {
                     color="success"
                     onClick={() => navigate("/dependent")}
                   >
-                    Zakat
+                    Dependent & Zakat Info
                   </Button>
                 </div>
               </CardBody>

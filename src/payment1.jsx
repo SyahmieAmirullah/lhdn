@@ -22,24 +22,16 @@ const Payment = () => {
         // Fetch payment info from your backend
         const paymentRes = await axios.get(`http://localhost:3000/payment/${userId}`);
 
-        // Fetch full name, address, and status from external JPN API
-        const profileRes = await axios.post(
-          'https://myjpn.ddns.net:5443/LHDNApi/profile',
-          { icno: userId }, // request body
-          { headers: { 'Content-Type': 'application/json' } }
-        );
-
-        const userData = profileRes.data?.user || {};
-        const fullName = userData.fullname || 'Unknown';
-        const address = userData.address || 'N/A';
-        const status = userData.status || 'N/A';
+        // Fetch user profile info from your own API
+        const profileRes = await axios.get(`http://localhost:3001/api/user-info/${userId}`);
+        const userData = profileRes.data;
 
         // Combine both results
         const combinedData = {
           ...paymentRes.data,
-          FULL_NAME: fullName,
-          ADDRESS: address,
-          STATUS: status,
+          FULL_NAME: userData.fullname || 'Unknown',
+          ADDRESS: userData.address || 'N/A',
+          STATUS: userData.status || 'N/A',
         };
 
         setPayment(combinedData);

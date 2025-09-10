@@ -24,8 +24,6 @@ const Efiling = () => {
     totalIncome: 0,
     taxableIncome: 0,
     taxAmount: 0,
-    paymentsMade: 0,
-    balanceDue: 0,
     signedBy: "",
     signerIdentification: "",
     timestamp: "",
@@ -54,29 +52,30 @@ const Efiling = () => {
     }));
 
     if (userId) {
-      axios.get(`http://localhost:3000/api/profile/${userId}`).then((res) => {
-        const user = res.data;
+      // Get user profile (e.g., full name)
+      axios.post("https://myjpn.ddns.net:5443/LHDNApi/profile", { icno: userId }).then((res) => {
+        const user = res.data?.user || {};
         setFormData((prev) => ({
           ...prev,
-          name: user.fullname ?? "",
-          identificationNo: user.user_id ?? "",
-          signedBy: user.fullname ?? "",
-          signerIdentification: user.user_id ?? "",
+          name: user.fullname || "",
+          identificationNo: userId,
+          signedBy: user.fullname || "",
+          signerIdentification: userId,
         }));
       });
 
-      axios.get(`http://localhost:3000/api/tax-submit/${userId}`).then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const tax = res.data[0];
-          setFormData((prev) => ({
-            ...prev,
-            totalIncome: tax.total_income ?? 0,
-            taxableIncome: tax.taxable_income ?? 0,
-            taxAmount: tax.tax_due ?? 0,
-          }));
-          setOriginalTaxAmount(Number(tax.tax_due ?? 0));
-          setFinalTaxAmount(Number(tax.tax_due ?? 0));
-        }
+      // Get tax data
+      axios.get(`http://localhost:3000/api/tax/${userId}`).then((res) => {
+        const tax = res.data;
+        setFormData((prev) => ({
+          ...prev,
+          totalIncome: tax.TOTAL_INCOME ?? 0,
+          taxableIncome: tax.TAXABLE_INCOME ?? 0,
+          taxAmount: tax.TAX_DUE ?? 0,
+          submitId: tax.SUBMIT_ID ?? "",
+        }));
+        setOriginalTaxAmount(Number(tax.TAX_DUE ?? 0));
+        setFinalTaxAmount(Number(tax.TAX_DUE ?? 0));
       });
     }
   }, []);
@@ -91,15 +90,6 @@ const Efiling = () => {
       taxAmount: newTax,
     }));
   }, [deductions]);
-
-  useEffect(() => {
-    const paid = parseFloat(formData.paymentsMade) || 0;
-    const due = Math.max(finalTaxAmount - paid, 0);
-    setFormData((prev) => ({
-      ...prev,
-      balanceDue: due,
-    }));
-  }, [formData.paymentsMade, finalTaxAmount]);
 
   const handleImageChange = (e) => {
     setImages([...e.target.files]);
@@ -177,14 +167,7 @@ const Efiling = () => {
       deductions,
       totalDeduction,
       finalTaxAmount,
-      paymentsMade: parseFloat(formData.paymentsMade),
-      balanceDue: parseFloat(formData.balanceDue),
     };
-
-    if (formDataToSend.paymentsMade < 0 || formDataToSend.balanceDue < 0) {
-      toast.error("Nilai tidak boleh negatif.");
-      return;
-    }
 
     try {
       const response = await axios.post("http://localhost:3000/api/deduct", formDataToSend);
@@ -246,27 +229,6 @@ const Efiling = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label>Bayaran PCB / Seksyen107D / CP500</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={formData.paymentsMade}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (value >= 0 || e.target.value === "") {
-                      setFormData({ ...formData, paymentsMade: e.target.value });
-                    }
-                  }}
-                  required
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label>Baki Cukai</Label>
-                <Input type="number" value={formData.balanceDue} readOnly />
-              </FormGroup>
-
-              <FormGroup>
                 <Label>Pengakuan Dan Ditandatangani Oleh</Label>
                 <Input type="text" value={formData.signedBy} readOnly />
               </FormGroup>
@@ -308,8 +270,9 @@ const Efiling = () => {
                       ))}
                     </tbody>
                   </Table>
-                  <h6 className="mt-3">Jumlah Pelepasan Cukai: <strong>RM {totalDeduction.toFixed(2)}</strong></h6>
-                  
+                  <h6 className="mt-3">
+                    Jumlah Pelepasan Cukai: <strong>RM {totalDeduction.toFixed(2)}</strong>
+                  </h6>
                 </>
               )}
 

@@ -20,6 +20,7 @@ import ResetPassword from "./ResetPassword";
 import UserProfileAdd from "./UserProfileAdd";
 import Payment from "./payment";
 import InsertPayment from "./insertpayment";
+import Dependent from "./dependent";
 
 // Admin Components
 import AdminMenu from "./AdminMenu";
@@ -104,6 +105,14 @@ root.render(
           element={
             <ProtectedRoute>
               <Payment />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dependent"
+          element={
+            <ProtectedRoute>
+              <Dependent />
             </ProtectedRoute>
           }
         />

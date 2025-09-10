@@ -4,11 +4,10 @@ import {
   Card, CardBody, Col, Form, FormGroup, Label, Input, Button, Row
 } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from './UserSideBar'; // Ensure this file exists
+import Sidebar from './UserSideBar';
 
 const UserProfileEdit = () => {
   const [profileData, setProfileData] = useState({
-    user_addr: '',
     user_occupation: '',
     income_bracket: '',
   });
@@ -24,7 +23,6 @@ const UserProfileEdit = () => {
         try {
           const response = await axios.get(`http://localhost:3000/api/profile/${userId}`);
           setProfileData({
-            user_addr: response.data.user_addr || '',
             user_occupation: response.data.user_occupation || '',
             income_bracket: response.data.income_bracket || '',
           });
@@ -55,9 +53,7 @@ const UserProfileEdit = () => {
       setLoading(true);
       setError(null);
 
-      // Send a PUT request to update only the address, occupation, and income bracket
       await axios.put(`http://localhost:3000/api/profile/${userId}`, {
-        user_addr: profileData.user_addr,
         user_occupation: profileData.user_occupation,
         income_bracket: profileData.income_bracket,
       });
@@ -74,29 +70,15 @@ const UserProfileEdit = () => {
 
   return (
     <Row className="m-4">
-      {/* Sidebar column */}
       <Col md="3">
         <Sidebar />
       </Col>
 
-      {/* Form column */}
       <Col md="9">
         <Card>
           <CardBody>
             <h3 className="mb-4 text-center">Edit User Profile</h3>
             <Form onSubmit={(e) => e.preventDefault()}>
-              {/* Address field */}
-              <FormGroup>
-                <Label htmlFor="user_addr">Address/Alamat</Label>
-                <Input
-                  type="text"
-                  id="user_addr"
-                  name="user_addr"
-                  value={profileData.user_addr || ''}
-                  onChange={handleInputChange}
-                  required
-                />
-              </FormGroup>
 
               {/* Occupation field */}
               <FormGroup>
@@ -124,10 +106,8 @@ const UserProfileEdit = () => {
                 />
               </FormGroup>
 
-              {/* Error Message */}
               {error && <p className="text-danger">{error}</p>}
 
-              {/* Save Button */}
               <Button
                 color="primary"
                 onClick={handleSave}

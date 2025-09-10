@@ -12,10 +12,6 @@ const Register = () => {
   });
 
   const [message, setMessage] = useState("");
-  const [userInfo, setUserInfo] = useState({
-    fullname: "",
-    address: ""
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,18 +19,13 @@ const Register = () => {
       ...prevData,
       [name]: value,
     }));
-
-    // Reset userInfo when IC number is changed
-    if (name === "user_id") {
-      setUserInfo({ fullname: "", address: "" });
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Step 1: Check IC number using correct key "icno"
+      // Step 1: Check IC number with MyJPN API (silent validation)
       const checkResponse = await fetch('https://myjpn.ddns.net:5443/LHDNApi/profile', {
         method: 'POST',
         headers: {
@@ -56,13 +47,7 @@ const Register = () => {
         return;
       }
 
-      // Set user info for display
-      setUserInfo({
-        fullname: checkData.user.fullname,
-        address: checkData.user.address
-      });
-
-      // Step 2: Proceed with registration
+      // Step 2: Proceed with registration (without fullname/address)
       const registerResponse = await fetch("http://localhost:3000/api/register", {
         method: "POST",
         headers: {
@@ -82,7 +67,7 @@ const Register = () => {
           user_email: "",
           user_phone: "",
         });
-        setUserInfo({ fullname: "", address: "" });
+        setMessage("");
 
         setTimeout(() => {
           window.location.href = "/login";
@@ -123,34 +108,6 @@ const Register = () => {
             placeholder="Enter your IC number"
           />
         </div>
-
-        {/* Show fullname if available */}
-        {userInfo.fullname && (
-          <div className="form-group">
-            <label>Full Name (from MyJPN)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={userInfo.fullname}
-              readOnly
-              disabled
-            />
-          </div>
-        )}
-
-        {/* Show address if available */}
-        {userInfo.address && (
-          <div className="form-group">
-            <label>Address (from MyJPN)</label>
-            <textarea
-              className="form-control"
-              value={userInfo.address}
-              rows="2"
-              readOnly
-              disabled
-            ></textarea>
-          </div>
-        )}
 
         <div className="form-group">
           <label htmlFor="username">USERNAME</label>

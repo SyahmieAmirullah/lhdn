@@ -1,118 +1,138 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+  import React, { useState, useEffect } from 'react';
+  import axios from 'axios';
+  import { useParams, useNavigate } from 'react-router-dom';
+  import "./insertpayment.css";
 
-const InsertPayment = () => {
-  const { userId } = useParams();
-  const navigate = useNavigate();
+  const InsertPayment = () => {
+    const { userId } = useParams();
+    const navigate = useNavigate();
 
-  const [submitId, setSubmitId] = useState('');
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [transactionRef, setTransactionRef] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+    const [submitId, setSubmitId] = useState('');
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [transactionRef, setTransactionRef] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
-  // New state for fetched payment data
-  const [paymentInfo, setPaymentInfo] = useState(null);
+    // New state for fetched payment data
+    const [paymentInfo, setPaymentInfo] = useState(null);
 
-  useEffect(() => {
-    // Fetch submit ID and tax due
-    const fetchPaymentInfo = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/payment/${userId}`);
-        const data = response.data;
-        setPaymentInfo(data);
-        if (data && data.SUBMIT_ID) {
-          setSubmitId(data.SUBMIT_ID); // pre-fill submit ID in form
+    useEffect(() => {
+      // Fetch submit ID and tax due
+      const fetchPaymentInfo = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/payment/${userId}`);
+          const data = response.data;
+          setPaymentInfo(data);
+
+          if (data && data.SUBMIT_ID) {
+            setSubmitId(data.SUBMIT_ID);
+            setPaymentAmount(data.TAX_DUE); // auto-fill payment amount
+          }
+        } catch (err) {
+          console.error('Error fetching payment info:', err);
         }
+      };
+
+      fetchPaymentInfo();
+    }, [userId]);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+
+      if (!submitId || !paymentAmount || !transactionRef) {
+        setError('All fields are required.');
+        return;
+      }
+
+      try {
+        const response = await axios.post('http://localhost:3000/payment/insert', {
+          submit_id: submitId,
+          payment_amount: paymentAmount,
+          transaction_ref: transactionRef,
+        });
+
+        setMessage(`✅ ${response.data.message} - Status: ${response.data.payment_status}`);
+        setError('');
+
+        setTimeout(() => navigate('/payment'), 2000);
       } catch (err) {
-        console.error('Error fetching payment info:', err);
+        console.error(err);
+        setError('❌ Failed to insert payment. Please try again.');
+        setMessage('');
       }
     };
 
-    fetchPaymentInfo();
-  }, [userId]);
+    return (
+      <div className="p-4 max-w-md mx-auto bg-white rounded shadow">
+        <h2 className="text-xl font-semibold mb-4">Insert Payment</h2>
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+        {/* Display fetched payment info */}
+        {paymentInfo && (
+          <>
+            <div className="mb-4 p-3 bg-gray-100 rounded">
+              <p><strong>Full Name:</strong> {paymentInfo.FULL_NAME}</p>
+              <p><strong>Payment Status:</strong> {paymentInfo.PAYMENT_STATUS || 'Not Paid'}</p>
+            </div>
 
-    if (!submitId || !paymentAmount || !transactionRef) {
-      setError('All fields are required.');
-      return;
-    }
+            {/* Separate container for Submit ID */}
+            <div className="mb-4 p-3 bg-blue-50 border rounded">
+              <p><strong>🧾 Submit ID:</strong> {paymentInfo.SUBMIT_ID}</p>
+            </div>
 
-    try {
-      const response = await axios.post('http://localhost:3000/payment/insert', {
-        submit_id: submitId,
-        payment_amount: paymentAmount,
-        transaction_ref: transactionRef,
-      });
+            {/* Separate container for Payment Amount */}
+            <div className="mb-4 p-3 bg-green-50 border rounded">
+              <p><strong>💰 Payment Amount (RM):</strong> {paymentInfo.TAX_DUE}</p>
+            </div>
+          </>
+        )}
 
-      setMessage(`✅ ${response.data.message} - Status: ${response.data.payment_status}`);
-      setError('');
+        {error && <p className="text-red-600">{error}</p>}
+        {message && <p className="text-green-600">{message}</p>}
 
-      setTimeout(() => navigate('/payment'), 2000);
-    } catch (err) {
-      console.error(err);
-      setError('❌ Failed to insert payment. Please try again.');
-      setMessage('');
-    }
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label>Submit ID:</label>
+            <input
+              type="text"
+              value={submitId}
+              onChange={(e) => setSubmitId(e.target.value)}
+              className="w-full border p-2 rounded"
+              readOnly
+            />
+          </div>
+
+          <div>
+            <label>Payment Amount (RM):</label>
+            <input
+              type="number"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              className="w-full border p-2 rounded"
+              readOnly
+            />
+          </div>
+
+          <div>
+            <label>Transaction Reference:</label>
+            <input
+              type="text"
+              value={transactionRef}
+              onChange={(e) => setTransactionRef(e.target.value)}
+              className="w-full border p-2 rounded"
+              placeholder="Enter transaction reference"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Submit Payment
+          </button>
+        </form>
+      </div>
+    );
   };
 
-  return (
-    <div className="p-4 max-w-md mx-auto bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Insert Payment</h2>
-
-      {/* Display fetched payment info */}
-      {paymentInfo && (
-        <div className="mb-4 p-3 bg-gray-100 rounded">
-          <p><strong>Full Name:</strong> {paymentInfo.FULL_NAME}</p>
-          <p><strong>Submit ID:</strong> {paymentInfo.SUBMIT_ID}</p>
-          <p><strong>Tax Due (RM):</strong> {paymentInfo.TAX_DUE}</p>
-          <p><strong>Payment Status:</strong> {paymentInfo.PAYMENT_STATUS || 'Not Paid'}</p>
-        </div>
-      )}
-
-      {error && <p className="text-red-600">{error}</p>}
-      {message && <p className="text-green-600">{message}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label>Submit ID:</label>
-          <input
-            type="text"
-            value={submitId}
-            onChange={(e) => setSubmitId(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        <div>
-          <label>Payment Amount (RM):</label>
-          <input
-            type="number"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        <div>
-          <label>Transaction Reference:</label>
-          <input
-            type="text"
-            value={transactionRef}
-            onChange={(e) => setTransactionRef(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          Submit Payment
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default InsertPayment;
+  export default InsertPayment;
