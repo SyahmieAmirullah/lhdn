@@ -51,9 +51,9 @@ app.get("/api/user-info/:userId", (req, res) => {
     SELECT 
       USER_ID AS user_id,
       FULLNAME AS fullname,
-      ADDRESS AS address,
+      USER_ADDR AS address,
       USER_STATUS AS status
-    FROM USER
+    FROM user
     WHERE USER_ID = ?
   `;
 

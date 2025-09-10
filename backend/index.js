@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require("express"); //libraries
 const mysql = require("mysql2");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -6,18 +6,17 @@ const md5 = require("md5");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-const port = 3000;
+const port = 3000; // port number
 
 app.use(cors());
 app.use(bodyParser.json());
 
 // MySQL connection
 const db = mysql.createConnection({
-  host: "20.2.209.23",
-  user: "syahmie",
-  password: "1234", // your MySQL password
-  database: "lhdn", // your database name
-  //port: 3306, // default MySQL port
+  host: "20.2.209.23", //Server IP address
+  user: "syahmie", //username
+  password: "1234", // password
+  database: "lhdn", //database name
 });
 
 // Connect to MySQL
@@ -55,8 +54,8 @@ app.post("/api/register", (req, res) => {
   const hashedPassword = md5(user_password);
 
   const sql = `
-    INSERT INTO USER 
-    (USER_ID, USERNAME, USER_PASS, USER_EMAIL, USER_PHONE, PAYER_STATUS) 
+    INSERT INTO USERS 
+    (USER_ID, USERNAME,USER_PASS, USER_EMAIL, USER_PHONE, PAYER_STATUS) 
     VALUES (?, ?, ?, ?, ?, 'ACTIVE')
   `;
 
@@ -86,7 +85,7 @@ app.post("/api/login", (req, res) => {
 
   const sql = `
     SELECT USER_ID, USERNAME, USER_ROLE 
-    FROM USER 
+    FROM USERS 
     WHERE USER_ID = ? AND USER_PASS = ?
   `;
 
@@ -133,7 +132,7 @@ app.post("/api/reset-password", (req, res) => {
   }
 
   const hashedPassword = md5(newPassword);
-  const sql = "UPDATE USER SET USER_PASS = ? WHERE USER_ID = ?";
+  const sql = "UPDATE USERS SET USER_PASS = ? WHERE USER_ID = ?";
 
   db.query(sql, [hashedPassword, identifier], (err, result) => {
     if (err) {
@@ -155,19 +154,19 @@ app.get("/api/profile/:userId", (req, res) => {
 
   const sql = `
     SELECT 
-      USER.USER_ID AS user_id,
+      USERS.USER_ID AS user_id,
       USER_PROFILE.FULL_NAME AS fullname,
       USER_PROFILE.USER_ADDR AS address,
-      USER.USER_EMAIL AS email,
-      USER.PAYER_STATUS AS payerStatus,
-      USER.USER_PHONE AS phone,
+      USERS.USER_EMAIL AS email,
+      USERS.PAYER_STATUS AS payerStatus,
+      USERS.USER_PHONE AS phone,
       USER_PROFILE.USER_OCCUPATION AS occupation,
       USER_PROFILE.INCOME_BRACKET AS incomeBracket,
       CLASS.CLASS_CAT AS socialClass
-    FROM USER
-    LEFT JOIN USER_PROFILE ON USER.USER_ID = USER_PROFILE.USER_ID
-    LEFT JOIN CLASS ON USER.CLASS_ID = CLASS.CLASS_ID
-    WHERE USER.USER_ID = ?
+    FROM USERS
+    LEFT JOIN USER_PROFILE ON USERS.USER_ID = USER_PROFILE.USER_ID
+    LEFT JOIN CLASS ON USERS.CLASS_ID = CLASS.CLASS_ID
+    WHERE USERS.USER_ID = ?
   `;
 
   db.query(sql, [userId], (err, result) => {
@@ -225,7 +224,7 @@ app.post("/api/profile/:userId", (req, res) => {
 
       // Update the USER table with the class_id based on income bracket
       db.query(
-        `UPDATE USER SET CLASS_ID = ? WHERE USER_ID = ?`,
+        `UPDATE USERS SET CLASS_ID = ? WHERE USER_ID = ?`,
         [classId, userId],
         (updateErr, updateResults) => {
           if (updateErr) {
@@ -316,9 +315,9 @@ app.put("/api/profile/:userId", (req, res) => {
       return res.status(404).json({ error: "User profile not found" });
     }
 
-    // If the income bracket was updated, update the CLASS_ID in the USER table
+    // If the income bracket was updated, update the CLASS_ID in the USERS table
     if (newClassId !== null) {
-      const userUpdateQuery = "UPDATE USER SET CLASS_ID = ? WHERE USER_ID = ?";
+      const userUpdateQuery = "UPDATE USERS SET CLASS_ID = ? WHERE USER_ID = ?";
       db.query(userUpdateQuery, [newClassId, userId], (err, results) => {
         if (err) {
           console.error("Error updating USER CLASS_ID:", err);
@@ -438,7 +437,7 @@ app.get("/api/admin/users", (req, res) => {
       USER_EMAIL AS email,
       USER_PHONE AS phone,
       PAYER_STATUS AS status
-    FROM USER
+    FROM USERS
   `;
 
   db.query(sql, (err, results) => {
@@ -498,7 +497,7 @@ app.delete("/api/admin/users/:userId", (req, res) => {
           }
 
           // Step 5: Finally delete the user
-          const deleteUser = "DELETE FROM USER WHERE USER_ID = ?";
+          const deleteUser = "DELETE FROM USERS WHERE USER_ID = ?";
           db.query(deleteUser, [userId], (err, result) => {
             if (err) {
               console.error("Error deleting from USER:", err);
@@ -519,7 +518,7 @@ app.delete("/api/admin/users/:userId", (req, res) => {
 
 // ===================== ADMIN DASHBOARD TOTAL USERS =====================
 app.get("/api/admin/total-users", (req, res) => {
-  const query = "SELECT COUNT(*) AS totalUsers FROM USER";
+  const query = "SELECT COUNT(*) AS totalUsers FROM USERS";
 
   db.query(query, (err, results) => {
     if (err) {
@@ -710,8 +709,8 @@ WHERE t.user_id = ?
 app.get('/payment/:userId', async (req, res) => {
   const userId = req.params.userId;
   const query = `
-    SELECT u.USER_ID, up.FULL_NAME, t.TAX_DUE, p.PAYMENT_STATUS
-    FROM USER u
+    SELECT u.USER_ID,t.SUBMIT_ID, up.FULL_NAME, t.TAX_DUE, p.PAYMENT_STATUS
+    FROM USERS u
     JOIN TAX_SUBMIT t ON u.USER_ID = t.USER_ID
     JOIN USER_PROFILE up ON u.USER_ID = up.USER_ID
     LEFT JOIN TAX_PAYMENT p ON t.SUBMIT_ID = p.SUBMIT_ID
@@ -727,7 +726,7 @@ app.get('/payment/:userId', async (req, res) => {
 //====================== POST PAYMENT =====================
 app.post('/payment/insert', (req, res) => {
   const { submit_id, payment_amount, transaction_ref } = req.body;
-  const status = parseFloat(payment_amount) > 0 ? 'PAID' : 'PENDING';
+  const status = parseFloat(payment_amount) >= 0 ? 'PAID' : 'PENDING';
 
   const getTaxDueQuery = `SELECT TAX_DUE FROM TAX_SUBMIT WHERE SUBMIT_ID = ?`;
 
